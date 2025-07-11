@@ -10,7 +10,8 @@
         /* Benutzerdefinierte Stile für die Schriftart und den Hintergrund */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Heller grauer Hintergrund */
+            /* Hintergrund mit grauem Verlauf */
+            background: linear-gradient(to bottom, #f0f2f5, #e0e2e5); 
             color: #1f2937; /* Dunkler Text für Light Theme */
             display: flex;
             flex-direction: column; /* Elemente vertikal stapeln */
@@ -46,10 +47,10 @@
             }
             /* Anordnung der verbleibenden Kacheln unter dem Zeitplan */
             #activities-kachel { grid-column: 1 / span 1; }
-            #participants-kachel { grid-column: 2 / span 1; }
-            #accommodation-kachel { grid-column: 3 / span 1; }
-            #travel-kachel { grid-column: 1 / span 2; } /* Reiseinfo nimmt 2 Spalten ein */
-            #todo-kachel { grid-column: 3 / span 1; } /* To-Do nimmt 1 Spalte ein */
+            #todo-kachel { grid-column: 2 / span 1; } /* To-Do nimmt 1 Spalte ein */
+            #participants-kachel { grid-column: 3 / span 1; }
+            #accommodation-kachel { grid-column: 1 / span 1; }
+            #travel-kachel { grid-column: 2 / span 2; } /* Travel info takes 2 columns */
         }
 
         /* Card background for Light Theme */
@@ -160,9 +161,32 @@
         .collapsible-icon {
             color: #6b7280; /* Graues Icon */
         }
+
+        /* Essential for smooth collapse/expand */
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .collapsible-content.collapsed {
+            max-height: 0 !important; /* Ensure it collapses fully */
+        }
+
+        /* Style for checkbox and label alignment */
+        .todo-item .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-right: 0.75rem; /* Space between checkbox and text */
+        }
+        .todo-item input[type="checkbox"] {
+            margin-right: 0.5rem; /* Space between checkbox and label */
+            transform: scale(1.2); /* Slightly larger checkbox */
+        }
     </style>
 </head>
 <body class="bg-gray-100 p-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-2 text-center">Мальчишник Миши</h1>
+    <p class="text-xl text-gray-700 mb-8 text-center">08. - 10. August 2025</p>
+
     <div class="container">
         <!-- Kachel für den Zeitplan (nimmt auf großen Bildschirmen 2/3 Breite ein) -->
         <div id="schedule-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
@@ -283,7 +307,34 @@
             </div>
         </div>
 
-        <!-- Kachel für die Teilnehmerliste -->
+        <!-- Neue Kachel für Offene To-Dos (JETZT HIER) -->
+        <div id="todo-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="todo-content">
+                <h2 class="text-3xl font-bold text-gray-800">Offene To-Dos</h2>
+                <span class="collapsible-icon text-gray-600 text-2xl">&#9660;</span>
+            </div>
+            <div id="todo-content" class="collapsible-content">
+                <div id="todo-list" class="space-y-3">
+                    <div class="todo-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="todo1" name="todo1" value="rooftop">
+                            <label for="todo1" class="label">Tickets für Rooftop Party "Noire Berlin" kaufen:</label>
+                        </div>
+                        <span class="description">Louis kümmert sich darum, sobald diese im Shop verfügbar sind.</span>
+                    </div>
+                    <div class="todo-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="todo2" name="todo2" value="boatparty">
+                            <label for="todo2" class="label">Tickets für Bootsparty kaufen:</label>
+                        </div>
+                        <span class="description">Veranstalter: Vollkommen Live. Kosten: 51€ p.P.</span>
+                    </div>
+                    <!-- Weitere To-Dos werden hier hinzugefügt -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Kachel für die Teilnehmerliste (JETZT HIER) -->
         <div id="participants-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="participants-content">
                 <h2 class="text-3xl font-bold text-gray-800">Teilnehmerliste</h2>
@@ -441,29 +492,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Neue Kachel für Offene To-Dos -->
-        <div id="todo-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
-            <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="todo-content">
-                <h2 class="text-3xl font-bold text-gray-800">Offene To-Dos</h2>
-                <span class="collapsible-icon text-gray-600 text-2xl">&#9660;</span>
-            </div>
-            <div id="todo-content" class="collapsible-content">
-                <div id="todo-list" class="space-y-3">
-                    <div class="todo-item">
-                        <span class="icon">&#10003;&#65039;</span> <!-- Checkmark Icon Emoji -->
-                        <span class="label">Tickets für Rooftop Party "Noire Berlin" kaufen:</span>
-                        <span class="description">Louis kümmert sich darum, sobald diese im Shop verfügbar sind.</span>
-                    </div>
-                    <div class="todo-item">
-                        <span class="icon">&#10003;&#65039;</span> <!-- Checkmark Icon Emoji -->
-                        <span class="label">Tickets für Bootsparty kaufen:</span>
-                        <span class="description">Veranstalter: Vollkommen Live. Kosten: 51€ p.P.</span>
-                    </div>
-                    <!-- Weitere To-Dos werden hier hinzugefügt -->
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -475,65 +503,80 @@
                 const content = document.getElementById(contentId);
                 const icon = header.querySelector('.collapsible-icon');
 
-                // Initial state setup
-                // Ensure content is visible initially if aria-expanded is true
-                if (header.getAttribute('aria-expanded') === 'true') {
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    content.classList.remove('collapsed');
-                    icon.style.transform = 'rotate(0deg)';
-                } else {
-                    content.style.maxHeight = '0';
-                    content.classList.add('collapsed');
-                    icon.style.transform = 'rotate(-90deg)';
-                }
+                // Function to set initial state and handle resize
+                const setContentHeight = () => {
+                    // Temporarily remove max-height to get the true scrollHeight
+                    content.style.maxHeight = 'none';
+                    // Force reflow to ensure the browser calculates the correct scrollHeight
+                    // This is crucial for mobile, where layout can change significantly
+                    content.offsetHeight;
+                    const currentScrollHeight = content.scrollHeight;
+
+                    if (header.getAttribute('aria-expanded') === 'true') {
+                        content.style.maxHeight = currentScrollHeight + 'px';
+                        content.classList.remove('collapsed');
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = '0px';
+                        content.classList.add('collapsed');
+                        icon.style.transform = 'rotate(-90deg)';
+                    }
+                };
+
+                // Set initial state on load
+                setContentHeight();
 
                 header.addEventListener('click', () => {
                     const isExpanded = header.getAttribute('aria-expanded') === 'true';
 
                     if (isExpanded) {
-                        // Set max-height to its current scrollHeight before starting the transition to 0
-                        // This prevents content from jumping if it was previously resized (e.g., by window resize)
+                        // Before collapsing, ensure max-height is set to current scrollHeight
+                        // This prevents jumps if content was previously 'none' or dynamically changed
                         content.style.maxHeight = content.scrollHeight + 'px';
-                        // Force a reflow to ensure the browser applies the new max-height before the transition
+                        // Force a reflow to apply the pixel value before transition to 0
                         content.offsetHeight; 
-                        content.style.maxHeight = '0'; // Start the collapse animation
+                        content.style.maxHeight = '0px'; // Start the collapse animation
                         content.classList.add('collapsed'); // Add class for opacity/padding changes
                         header.setAttribute('aria-expanded', 'false');
                         icon.style.transform = 'rotate(-90deg)';
                     } else {
-                        // Remove the 'collapsed' class first to ensure full visibility for scrollHeight calculation
+                        // When expanding, remove 'collapsed' class and temporarily clear max-height
+                        // to get the accurate scrollHeight for the full content.
                         content.classList.remove('collapsed');
-                        // Temporarily clear max-height to get the accurate scrollHeight
-                        content.style.maxHeight = ''; 
-                        // Force a reflow to ensure the browser calculates the correct scrollHeight
-                        content.offsetHeight; 
-                        content.style.maxHeight = content.scrollHeight + 'px'; // Animate to the full height
+                        content.style.maxHeight = 'none'; // Temporarily set to none to get true scrollHeight
+                        const currentScrollHeight = content.scrollHeight; // Get the full height
+
+                        // Set max-height to 0, force reflow, then set to actual height
+                        // This ensures the transition is visible from 0 to full height
+                        content.style.maxHeight = '0px';
+                        content.offsetHeight; // Force reflow
+                        content.style.maxHeight = currentScrollHeight + 'px'; // Animate to full height
+
                         header.setAttribute('aria-expanded', 'true');
                         icon.style.transform = 'rotate(0deg)';
                     }
                 });
 
-                // Add an event listener to adjust maxHeight when the transition ends
-                // This is crucial for responsive layouts and to prevent issues if content changes
+                // Crucial: After expansion, set max-height to 'none' to allow natural content flow
+                // and prevent content being cut off on resize or dynamic changes.
                 content.addEventListener('transitionend', () => {
-                    // If the content is expanded after the transition, set max-height to 'none'
-                    // This allows the content to naturally adjust its height if its internal content changes
-                    // or if the window is resized, preventing future overflow issues.
                     if (header.getAttribute('aria-expanded') === 'true') {
-                        content.style.maxHeight = 'none'; 
+                        content.style.maxHeight = 'none';
                     }
                 });
 
                 // Handle window resize to adjust maxHeight for expanded sections
-                // This ensures that if the window is resized while a section is open,
-                // its max-height is recalculated to prevent content overflow or cut-off.
+                let resizeTimeout;
                 window.addEventListener('resize', () => {
-                    if (header.getAttribute('aria-expanded') === 'true' && content.style.maxHeight !== 'none') {
-                        // Temporarily set to 'none' to allow browser to recalculate natural height
-                        content.style.maxHeight = 'none';
-                        // Then set to the new scrollHeight
-                        content.style.maxHeight = content.scrollHeight + 'px';
-                    }
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        // Only recalculate if the section is currently expanded
+                        if (header.getAttribute('aria-expanded') === 'true') {
+                            // Temporarily set to 'none' to get the true current scrollHeight
+                            content.style.maxHeight = 'none';
+                            content.style.maxHeight = content.scrollHeight + 'px';
+                        }
+                    }, 100); // Debounce for 100ms
                 });
             });
         });
