@@ -4,64 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Junggesellenabschiedsplaner</title>
-    <!-- Load Tailwind CSS -->
+    <!-- Lade Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles for font and background */
+        /* Benutzerdefinierte Stile für die Schriftart und den Hintergrund */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Light gray background */
+            background-color: #f0f2f5; /* Heller grauer Hintergrund */
+            color: #1f2937; /* Dunkler Text für Light Theme */
             display: flex;
+            flex-direction: column; /* Elemente vertikal stapeln */
             justify-content: center;
-            align-items: flex-start; /* Align to top */
-            min-height: 100vh; /* Minimum viewport height */
-            padding: 1rem; /* Reduced padding for smartphones */
+            align-items: center; /* Horizontal zentrieren */
+            min-height: 100vh; /* Mindesthöhe des Viewports */
+            padding: 1rem; /* Reduzierte Polsterung für Smartphones */
             box-sizing: border-box;
         }
         .container {
-            max-width: 1200px; /* Maximum container width */
+            max-width: 1200px; /* Maximale Breite des Containers */
             width: 100%;
             display: grid;
-            gap: 1.5rem; /* Reduced gap between tiles for smartphones */
-            grid-template-columns: 1fr; /* Default single column for small screens */
+            gap: 1.5rem; /* Reduzierter Abstand zwischen den Kacheln für Smartphones */
+            grid-template-columns: 1fr; /* Standardmäßig eine Spalte für kleine Bildschirme */
         }
-        @media (min-width: 768px) { /* For medium screens (tablets) */
+        @media (min-width: 768px) { /* Für mittlere Bildschirme (Tablets) */
             .container {
-                gap: 2rem; /* Normal gap for tablets */
-                grid-template-columns: 1fr 1fr; /* Two columns */
+                gap: 2rem; /* Normaler Abstand für Tablets */
+                grid-template-columns: 1fr 1fr; /* Zwei Spalten */
             }
             #schedule-kachel {
-                grid-column: span 2; /* Schedule takes both columns */
+                grid-column: span 2; /* Zeitplan nimmt beide Spalten ein */
             }
         }
-        @media (min-width: 1024px) { /* For large screens (desktops) */
+        @media (min-width: 1024px) { /* Für große Bildschirme (Desktops) */
             .container {
-                /* Schedule takes full width at the top, other tiles below */
+                /* Zeitplan nimmt die volle Breite oben ein, die anderen Kacheln darunter */
                 grid-template-columns: 1fr 1fr 1fr;
             }
             #schedule-kachel {
-                grid-column: span 3; /* Schedule takes all three columns */
+                grid-column: span 3; /* Zeitplan nimmt alle drei Spalten ein */
             }
-            /* Arrangement of remaining tiles below the schedule */
+            /* Anordnung der verbleibenden Kacheln unter dem Zeitplan */
             #activities-kachel { grid-column: 1 / span 1; }
             #participants-kachel { grid-column: 2 / span 1; }
             #accommodation-kachel { grid-column: 3 / span 1; }
-            #travel-kachel { grid-column: 1 / span 2; } /* Travel info takes 2 columns */
-            #todo-kachel { grid-column: 3 / span 1; } /* To-Do takes 1 column */
+            #travel-kachel { grid-column: 1 / span 2; } /* Reiseinfo nimmt 2 Spalten ein */
+            #todo-kachel { grid-column: 3 / span 1; } /* To-Do nimmt 1 Spalte ein */
         }
 
-        /* Additional styles for participant list, accommodation, and travel information for better appearance and space saving */
+        /* Card background for Light Theme */
+        .bg-white {
+            background-color: #ffffff; /* Weißer Hintergrund für Kacheln */
+            border-color: #e2e8f0; /* Hellerer Rahmen */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Standard Schatten */
+        }
+
+        /* Text colors for Light Theme */
+        h2, h3 {
+            color: #1f2937; /* Dunkler Text für Überschriften */
+        }
+        p, .label, .description, .value {
+            color: #4b5563; /* Grauer Text für Absätze und Beschreibungen */
+        }
+        .font-semibold {
+            color: #1f2937; /* Dunklerer Text für fettgedruckte Elemente */
+        }
+
+        /* Specific item backgrounds for Light Theme */
         .participant-item, .info-item, .todo-item {
             display: flex;
-            flex-direction: column; /* Default column layout for small screens */
-            align-items: flex-start; /* Align to left */
+            flex-direction: column; /* Standard Spaltenlayout für kleine Bildschirme */
+            align-items: flex-start; /* Links ausrichten */
             padding: 0.75rem 1rem;
-            background-color: #f8fafc; /* Very light blue */
-            border: 1px solid #e0e7ff; /* Light blue border */
+            background-color: #f8fafc; /* Sehr helles Blau */
+            border: 1px solid #e0e7ff; /* Helle blaue Umrandung */
             border-radius: 0.5rem;
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        @media (min-width: 640px) { /* From small tablets/larger smartphones, back to row */
+        @media (min-width: 640px) { /* Ab kleinen Tablets/größeren Smartphones wieder in einer Reihe */
             .participant-item, .info-item, .todo-item {
                 flex-direction: row;
                 align-items: center;
@@ -70,85 +90,81 @@
 
         .participant-item .icon, .info-item .icon, .todo-item .icon {
             font-size: 1.5rem;
-            margin-right: 0.75rem; /* Slightly less space to text */
-            color: #6366f1; /* Darker blue */
-            flex-shrink: 0; /* Prevents icon from shrinking */
-            margin-bottom: 0.25rem; /* Bottom margin in column layout */
+            margin-right: 0.75rem; /* Etwas weniger Abstand zum Text */
+            color: #6366f1; /* Dunkleres Blau */
+            flex-shrink: 0; /* Verhindert, dass das Icon schrumpft */
+            margin-bottom: 0.25rem; /* Abstand nach unten im Spaltenlayout */
         }
         @media (min-width: 640px) {
             .participant-item .icon, .info-item .icon, .todo-item .icon {
-                margin-bottom: 0; /* Reset in row layout */
+                margin-bottom: 0; /* Zurücksetzen im Reihenlayout */
             }
         }
 
         .participant-item .name, .info-item .label, .todo-item .label {
             font-weight: 600;
-            color: #1f2937; /* Dark text */
-            margin-right: 0.5rem; /* Space between name/label and description/value */
-            margin-bottom: 0.25rem; /* Bottom margin in column layout */
+            color: #1f2937; /* Dunkler Text */
+            margin-right: 0.5rem; /* Abstand zwischen Name/Label und Beschreibung/Wert */
+            margin-bottom: 0.25rem; /* Abstand nach unten im Spaltenlayout */
         }
         @media (min-width: 640px) {
             .participant-item .name, .info-item .label, .todo-item .label {
-                margin-bottom: 0; /* Reset in row layout */
+                margin-bottom: 0; /* Zurücksetzen im Reihenlayout */
             }
         }
 
         .participant-item .description, .info-item .value, .todo-item .description {
             font-size: 0.9rem;
-            color: #6b7280; /* Gray text for description/value */
-            white-space: normal; /* Allows line breaks for smartphones */
-            overflow: visible; /* Shows overflowing text */
-            text-overflow: clip; /* No ellipsis, text wraps */
+            color: #6b7280; /* Grauer Text für Beschreibung/Wert */
+            white-space: normal; /* Erlaubt Zeilenumbruch für Smartphones */
+            overflow: visible; /* Zeigt überlaufenden Text */
+            text-overflow: clip; /* Keine Auslassungspunkte, Text bricht um */
         }
         @media (min-width: 640px) {
             .participant-item .description, .info-item .value, .todo-item .description {
-                white-space: nowrap; /* Back to single line from tablet size */
+                white-space: nowrap; /* Wieder in einer Reihe ab Tablet-Größe */
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
         }
 
         .info-item .value.flex-col {
-            white-space: normal; /* Allows line breaks for lists in values */
+            white-space: normal; /* Erlaubt Zeilenumbruch für Listen in Werten */
         }
 
-        /* Styles for collapsible sections */
-        .collapsible-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            padding-bottom: 1rem; /* Space below header */
-            border-bottom: 1px solid #e0e7ff; /* Separator */
-            margin-bottom: 1rem; /* Space below separator */
+        /* Timeline colors for Light Theme */
+        .border-yellow-500 { border-color: #f59e0b; } /* Original Gelb */
+        .border-teal-500 { border-color: #14b8a6; } /* Original Türkis */
+        .border-red-500 { border-color: #ef4444; } /* Original Rot */
+        .bg-yellow-300 { background-color: #fcd34d; } /* Original Gelb */
+        .bg-yellow-500 { background-color: #f59e0b; } /* Original Gelb */
+        .bg-teal-300 { background-color: #5eead4; } /* Original Türkis */
+        .bg-teal-500 { background-color: #14b8a6; } /* Original Türkis */
+        .bg-red-300 { background-color: #fca5a5; } /* Original Rot */
+        .bg-red-500 { background-color: #ef4444; } /* Original Rot */
+
+        /* Activity list item background for Light Theme */
+        .bg-blue-50 {
+            background-color: #eff6ff; /* Helles Blau für Aktivitäten */
+            border-color: #bfdbfe; /* Heller blauer Rahmen */
+            color: #1e40af; /* Dunkler blauer Text */
         }
-        .collapsible-header h2 {
-            margin-bottom: 0; /* Remove default margin from h2 */
+        .bg-blue-50 h3 {
+            color: #1e40af; /* Dunkler blauer Text für Aktivitätstitel */
+        }
+
+        /* Collapsible header for Light Theme */
+        .collapsible-header {
+            border-bottom-color: #e0e7ff; /* Helle Trennlinie */
         }
         .collapsible-icon {
-            transition: transform 0.3s ease;
-        }
-        .collapsible-header[aria-expanded="true"] .collapsible-icon {
-            transform: rotate(0deg);
-        }
-        .collapsible-header[aria-expanded="false"] .collapsible-icon {
-            transform: rotate(-90deg); /* Rotate icon when collapsed */
-        }
-        .collapsible-content {
-            overflow: hidden;
-            transition: max-height 0.3s ease-out; /* Smooth transition for collapsing */
-        }
-        .collapsible-content.collapsed {
-            max-height: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            opacity: 0;
+            color: #6b7280; /* Graues Icon */
         }
     </style>
 </head>
 <body class="bg-gray-100 p-8">
     <div class="container">
-        <!-- Tile for the schedule (takes 2/3 width on large screens) -->
+        <!-- Kachel für den Zeitplan (nimmt auf großen Bildschirmen 2/3 Breite ein) -->
         <div id="schedule-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="schedule-content">
                 <h2 class="text-3xl font-bold text-gray-800">Zeitplan des Junggesellenabschieds</h2>
@@ -156,7 +172,7 @@
             </div>
             <div id="schedule-content" class="collapsible-content">
                 <div id="schedule-timeline" class="space-y-8">
-                    <!-- Day 1: Friday, August 08, 2025 -->
+                    <!-- Tag 1: Freitag, 08. August 2025 -->
                     <div class="border-l-4 border-yellow-500 pl-4">
                         <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 1: Freitag, 08. August 2025</h3>
                         <div class="space-y-4">
@@ -187,7 +203,7 @@
                         </div>
                     </div>
 
-                    <!-- Day 2: Saturday, August 09, 2025 -->
+                    <!-- Tag 2: Samstag, 09. August 2025 -->
                     <div class="border-l-4 border-teal-500 pl-4">
                         <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 2: Samstag, 09. August 2025</h3>
                         <div class="space-y-4">
@@ -212,7 +228,7 @@
                         </div>
                     </div>
 
-                    <!-- Day 3: Sunday, August 10, 2025 -->
+                    <!-- Tag 3: Sonntag, 10. August 2025 -->
                     <div class="border-l-4 border-red-500 pl-4">
                         <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 3: Sonntag, 10. August 2025</h3>
                         <div class="space-y-4">
@@ -225,13 +241,19 @@
                             <div class="relative pl-8">
                                 <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
                                 <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">12:00 Uhr: Check-out & Abreise</p>
+                                <p class="text-lg font-medium text-gray-900">12:00 Uhr: Check-out</p>
+                                <p class="text-gray-700">Hotel Amano East Side.</p>
+                            </div>
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
+                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
+                                <p class="text-lg font-medium text-gray-900">Abreise</p>
                                 <p class="text-gray-700">
                                     <span class="font-semibold">ICE 377:</span>
-                                    <br> Berlin Hbf: Abfahrt 07:24 Uhr
-                                    <br> Braunschweig Hbf: Ankunft 08:55 Uhr / Abfahrt 08:57 Uhr
-                                    <br> Frankfurt (Main) Hbf: Ankunft 11:43 Uhr / Abfahrt 11:50 Uhr
-                                    <br> Mannheim Hbf: Ankunft 12:27 Uhr / Abfahrt 12:34 Uhr
+                                    <br> Berlin Hbf: Abfahrt 16:30 Uhr
+                                    <br> Braunschweig Hbf: Ankunft 17:55 Uhr / Abfahrt 17:57 Uhr
+                                    <br> Frankfurt (Main) Hbf: Ankunft 20:44 Uhr / Abfahrt 20:50 Uhr
+                                    <br> Mannheim Hbf: Ankunft 21:27 Uhr
                                 </p>
                             </div>
                         </div>
@@ -240,7 +262,7 @@
             </div>
         </div>
 
-        <!-- Tile for activities list -->
+        <!-- Kachel für Aktivitätenliste -->
         <div id="activities-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="activities-content">
                 <h2 class="text-3xl font-bold text-gray-800">Aktivitäten für den Junggesellenabschied</h2>
@@ -256,12 +278,12 @@
                         <h3 class="text-xl font-semibold text-blue-800">Bootsparty</h3>
                         <p class="text-gray-700">Veranstalter: Vollkommen Live. Musik: House Techno. Kosten: 51€ p.P.</p>
                     </div>
-                    <!-- More activities will be added here gradually -->
+                    <!-- Weitere Aktivitäten werden hier nach und nach hinzugefügt -->
                 </div>
             </div>
         </div>
 
-        <!-- Tile for participant list -->
+        <!-- Kachel für die Teilnehmerliste -->
         <div id="participants-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="participants-content">
                 <h2 class="text-3xl font-bold text-gray-800">Teilnehmerliste</h2>
@@ -269,7 +291,7 @@
             </div>
             <div id="participants-content" class="collapsible-content">
                 <div id="participants-list" class="space-y-3">
-                    <!-- Participants will be dynamically inserted here -->
+                    <!-- Teilnehmer werden hier dynamisch eingefügt -->
                     <div class="participant-item">
                         <span class="icon">&#128100;</span>
                         <span class="name">Michi</span>
@@ -324,7 +346,7 @@
             </div>
         </div>
 
-        <!-- Tile for accommodation & room distribution -->
+        <!-- Kachel für Unterkunft & Zimmerverteilung -->
         <div id="accommodation-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="accommodation-content">
                 <h2 class="text-3xl font-bold text-gray-800">Unterkunft & Zimmerverteilung</h2>
@@ -335,7 +357,7 @@
                     <div class="info-item">
                         <span class="icon">&#127976;</span> <!-- Hotel Icon Emoji -->
                         <span class="label">Hotel:</span>
-                        <span class="value">Amano East Side, Berlin</span>
+                        <span class="value"><a href="https://www.google.com/maps/search/?api=1&query=Amano%20East%20Side%2C%20Berlin" target="_blank" class="text-blue-600 hover:underline">Amano East Side, Berlin</a></span>
                     </div>
                     <div class="info-item">
                         <span class="icon">&#128717;&#65039;</span> <!-- Bed Icon Emoji -->
@@ -365,7 +387,7 @@
             </div>
         </div>
 
-        <!-- New tile for travel information -->
+        <!-- Neue Kachel für Reiseinformationen -->
         <div id="travel-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="travel-content">
                 <h2 class="text-3xl font-bold text-gray-800">Reiseinformationen</h2>
@@ -377,7 +399,7 @@
                     <div class="info-item">
                         <span class="icon">&#128642;</span> <!-- Train Icon Emoji -->
                         <span class="label">Zug:</span>
-                        <span class="value">ICE 374</span>
+                        <span class="value"><a href="https://www.google.com/maps/search/?api=1&query=ICE+374+Mannheim+Hbf+to+Berlin+Hbf" target="_blank" class="text-blue-600 hover:underline">ICE 374</a></span>
                     </div>
                     <div class="info-item">
                         <span class="icon">&#128187;</span> <!-- Computer/Seat Icon Emoji -->
@@ -399,7 +421,7 @@
                     <div class="info-item">
                         <span class="icon">&#128642;</span> <!-- Train Icon Emoji -->
                         <span class="label">Zug:</span>
-                        <span class="value">ICE 377</span>
+                        <span class="value"><a href="https://www.google.com/maps/search/?api=1&query=ICE+377+Berlin+Hbf+to+Mannheim+Hbf" target="_blank" class="text-blue-600 hover:underline">ICE 377</a></span>
                     </div>
                     <div class="info-item">
                         <span class="icon">&#128187;</span> <!-- Computer/Seat Icon Emoji -->
@@ -410,17 +432,17 @@
                         <span class="icon">&#9200;</span> <!-- Clock Icon Emoji -->
                         <span class="label">Fahrzeiten:</span>
                         <div class="value flex flex-col items-start">
-                            <span>Berlin Hbf: Abfahrt 07:24 Uhr</span>
-                            <span>Braunschweig Hbf: Ankunft 08:55 Uhr / Abfahrt 08:57 Uhr</span>
-                            <span>Frankfurt (Main) Hbf: Ankunft 11:43 Uhr / Abfahrt 11:50 Uhr</span>
-                            <span>Mannheim Hbf: Ankunft 12:27 Uhr / Abfahrt 12:34 Uhr</span>
+                            <span>Berlin Hbf: Abfahrt 16:30 Uhr</span>
+                            <span>Braunschweig Hbf: Ankunft 17:55 Uhr / Abfahrt 17:57 Uhr</span>
+                            <span>Frankfurt (Main) Hbf: Ankunft 20:44 Uhr / Abfahrt 20:50 Uhr</span>
+                            <span>Mannheim Hbf: Ankunft 21:27 Uhr</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- New tile for open To-Dos -->
+        <!-- Neue Kachel für Offene To-Dos -->
         <div id="todo-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="todo-content">
                 <h2 class="text-3xl font-bold text-gray-800">Offene To-Dos</h2>
@@ -438,7 +460,7 @@
                         <span class="label">Tickets für Bootsparty kaufen:</span>
                         <span class="description">Veranstalter: Vollkommen Live. Kosten: 51€ p.P.</span>
                     </div>
-                    <!-- More To-Dos will be added here -->
+                    <!-- Weitere To-Dos werden hier hinzugefügt -->
                 </div>
             </div>
         </div>
@@ -449,32 +471,70 @@
             const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
 
             collapsibleHeaders.forEach(header => {
+                const contentId = header.getAttribute('aria-controls');
+                const content = document.getElementById(contentId);
+                const icon = header.querySelector('.collapsible-icon');
+
+                // Initial state setup
+                // Ensure content is visible initially if aria-expanded is true
+                if (header.getAttribute('aria-expanded') === 'true') {
+                    content.style.maxHeight = content.scrollHeight + 'px';
+                    content.classList.remove('collapsed');
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    content.style.maxHeight = '0';
+                    content.classList.add('collapsed');
+                    icon.style.transform = 'rotate(-90deg)';
+                }
+
                 header.addEventListener('click', () => {
-                    const contentId = header.getAttribute('aria-controls');
-                    const content = document.getElementById(contentId);
                     const isExpanded = header.getAttribute('aria-expanded') === 'true';
-                    const icon = header.querySelector('.collapsible-icon');
 
                     if (isExpanded) {
-                        content.style.maxHeight = '0';
-                        content.classList.add('collapsed');
-                        header.setAttribute('aria-expanded', 'false');
-                        icon.style.transform = 'rotate(-90deg)'; // Rotate icon when collapsed
-                    } else {
-                        // Set max-height to scrollHeight to allow smooth transition
+                        // Set max-height to its current scrollHeight before starting the transition to 0
+                        // This prevents content from jumping if it was previously resized (e.g., by window resize)
                         content.style.maxHeight = content.scrollHeight + 'px';
+                        // Force a reflow to ensure the browser applies the new max-height before the transition
+                        content.offsetHeight; 
+                        content.style.maxHeight = '0'; // Start the collapse animation
+                        content.classList.add('collapsed'); // Add class for opacity/padding changes
+                        header.setAttribute('aria-expanded', 'false');
+                        icon.style.transform = 'rotate(-90deg)';
+                    } else {
+                        // Remove the 'collapsed' class first to ensure full visibility for scrollHeight calculation
                         content.classList.remove('collapsed');
+                        // Temporarily clear max-height to get the accurate scrollHeight
+                        content.style.maxHeight = ''; 
+                        // Force a reflow to ensure the browser calculates the correct scrollHeight
+                        content.offsetHeight; 
+                        content.style.maxHeight = content.scrollHeight + 'px'; // Animate to the full height
                         header.setAttribute('aria-expanded', 'true');
-                        icon.style.transform = 'rotate(0deg)'; // Reset icon rotation
+                        icon.style.transform = 'rotate(0deg)';
                     }
                 });
 
-                // Set initial max-height for smooth transition
-                const contentId = header.getAttribute('aria-controls');
-                const content = document.getElementById(contentId);
-                if (content) {
-                    content.style.maxHeight = content.scrollHeight + 'px'; // Set initial height to content's scrollHeight
-                }
+                // Add an event listener to adjust maxHeight when the transition ends
+                // This is crucial for responsive layouts and to prevent issues if content changes
+                content.addEventListener('transitionend', () => {
+                    // If the content is expanded after the transition, set max-height to 'none'
+                    // This allows the content to naturally adjust its height if its internal content changes
+                    // or if the window is resized, preventing future overflow issues.
+                    if (header.getAttribute('aria-expanded') === 'true') {
+                        content.style.maxHeight = 'none'; 
+                    }
+                });
+
+                // Handle window resize to adjust maxHeight for expanded sections
+                // This ensures that if the window is resized while a section is open,
+                // its max-height is recalculated to prevent content overflow or cut-off.
+                window.addEventListener('resize', () => {
+                    if (header.getAttribute('aria-expanded') === 'true' && content.style.maxHeight !== 'none') {
+                        // Temporarily set to 'none' to allow browser to recalculate natural height
+                        content.style.maxHeight = 'none';
+                        // Then set to the new scrollHeight
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                    }
+                });
             });
         });
     </script>
