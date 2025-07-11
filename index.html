@@ -6,6 +6,8 @@
     <title>Junggesellenabschiedsplaner</title>
     <!-- Lade Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lade Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         /* Benutzerdefinierte Stile für die Schriftart und den Hintergrund */
         body {
@@ -20,6 +22,7 @@
             min-height: 100vh; /* Mindesthöhe des Viewports */
             padding: 1rem; /* Reduzierte Polsterung für Smartphones */
             box-sizing: border-box;
+            scroll-behavior: smooth; /* Sanftes Scrollen für Ankerlinks */
         }
         .container {
             max-width: 1200px; /* Maximale Breite des Containers */
@@ -53,14 +56,59 @@
             #travel-kachel { grid-column: 2 / span 2; } /* Travel info takes 2 columns */
         }
 
+        /* Sticky navigation */
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #ffffff; /* Weißer Hintergrund für die Navigationsleiste */
+            border-bottom: 1px solid #e2e8f0; /* Hellerer Rahmen unten */
+            padding: 0.75rem 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            width: 100%;
+            text-align: center;
+            margin-bottom: 2rem; /* Abstand zum Hauptinhalt */
+            overflow-x: auto; /* Ermöglicht horizontales Scrollen auf kleinen Bildschirmen */
+            white-space: nowrap; /* Verhindert Zeilenumbruch der Links */
+            -webkit-overflow-scrolling: touch; /* Verbessertes Scrollen auf iOS */
+        }
+        .sticky-nav a {
+            color: #4b5563; /* Grauer Text für Links */
+            font-weight: 500;
+            margin: 0 0.75rem;
+            padding: 0.5rem 0.25rem; /* Etwas mehr Padding für bessere Klickfläche */
+            text-decoration: none;
+            transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+            border-bottom: 2px solid transparent; /* Für den aktiven Zustand */
+        }
+        .sticky-nav a:hover {
+            color: #6366f1; /* Akzentfarbe beim Hover */
+            background-color: #f0f2f5; /* Subtiler Hintergrund beim Hover */
+            border-color: #6366f1; /* Akzentfarbe für Unterstreichung */
+        }
+        .sticky-nav a.active {
+            color: #6366f1; /* Akzentfarbe für aktiven Link */
+            font-weight: 600; /* Etwas fetter für aktiven Link */
+            border-color: #6366f1; /* Akzentfarbe für Unterstreichung */
+        }
+
         /* Card background for Light Theme */
         .bg-white {
             background-color: #ffffff; /* Weißer Hintergrund für Kacheln */
             border-color: #e2e8f0; /* Hellerer Rahmen */
             box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Standard Schatten */
+            border-radius: 0.75rem; /* Konsistenter Border Radius */
+            transition: box-shadow 0.2s ease-in-out; /* Übergang für Hover-Effekte */
+        }
+        .bg-white:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15); /* Stärkerer Schatten beim Hover auf Kacheln */
         }
 
         /* Text colors for Light Theme */
+        h1 {
+            color: #6366f1; /* Hauptüberschrift in Akzentfarbe */
+            font-weight: 800; /* Extra Bold für Hauptüberschrift */
+        }
         h2, h3 {
             color: #1f2937; /* Dunkler Text für Überschriften */
         }
@@ -89,13 +137,25 @@
             }
         }
 
+        /* Adjust icon size and color for Lucide Icons */
         .participant-item .icon, .info-item .icon, .todo-item .icon {
-            font-size: 1.5rem;
+            font-size: 1.5rem; /* Fallback for font-based icons */
+            width: 1.5rem; /* Explicit width for SVG icons */
+            height: 1.5rem; /* Explicit height for SVG icons */
             margin-right: 0.75rem; /* Etwas weniger Abstand zum Text */
             color: #6366f1; /* Dunkleres Blau */
             flex-shrink: 0; /* Verhindert, dass das Icon schrumpft */
             margin-bottom: 0.25rem; /* Abstand nach unten im Spaltenlayout */
         }
+        /* Style for SVG icons directly */
+        .participant-item .icon svg, .info-item .icon svg, .todo-item .icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: currentColor; /* Inherit color from parent */
+            stroke-width: 2; /* Default stroke width */
+            fill: none; /* No fill by default */
+        }
+
         @media (min-width: 640px) {
             .participant-item .icon, .info-item .icon, .todo-item .icon {
                 margin-bottom: 0; /* Zurücksetzen im Reihenlayout */
@@ -157,6 +217,11 @@
         /* Collapsible header for Light Theme */
         .collapsible-header {
             border-bottom-color: #e0e7ff; /* Helle Trennlinie */
+            transition: box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out; /* Übergang für Hover-Effekte */
+        }
+        .collapsible-header:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15); /* Stärkerer Schatten beim Hover */
+            background-color: #f8fafc; /* Leichter Hintergrund beim Hover */
         }
         .collapsible-icon {
             color: #6b7280; /* Graues Icon */
@@ -172,14 +237,57 @@
         }
 
         /* Style for checkbox and label alignment */
+        .todo-item {
+            display: flex;
+            align-items: flex-start; /* Aligns checkbox and text at the top */
+            gap: 0.75rem; /* Space between checkbox container and description */
+        }
         .todo-item .checkbox-container {
             display: flex;
             align-items: center;
-            margin-right: 0.75rem; /* Space between checkbox and text */
+            flex-shrink: 0; /* Prevents checkbox from shrinking */
         }
         .todo-item input[type="checkbox"] {
             margin-right: 0.5rem; /* Space between checkbox and label */
             transform: scale(1.2); /* Slightly larger checkbox */
+            flex-shrink: 0;
+        }
+        .todo-item label {
+            margin-bottom: 0; /* Remove default margin from label */
+        }
+        .todo-item .description {
+            flex-grow: 1; /* Allows description to take available space */
+        }
+        /* Style for completed To-Do items */
+        .todo-item.completed .label,
+        .todo-item.completed .description {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        /* Visuelle Trennung für Zeitplan-Tage */
+        .schedule-day-card {
+            background-color: #fdfdfd; /* Slightly whiter background for day cards */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem; /* Space between day cards */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        /* Remove default border-l-4 from inner div if using day card */
+        .schedule-day-card > div:first-child {
+            border-left: none !important;
+            padding-left: 0 !important;
+        }
+
+        /* Style for embedded Google Map */
+        .google-map-embed {
+            width: 100%;
+            height: 256px; /* Fixed height for the map iframe */
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            margin-top: 1rem; /* Space above the map */
+            margin-bottom: 1rem; /* Space below the map */
         }
     </style>
 </head>
@@ -187,8 +295,18 @@
     <h1 class="text-4xl font-bold text-gray-900 mb-2 text-center">Мальчишник Миши</h1>
     <p class="text-xl text-gray-700 mb-8 text-center">08. - 10. August 2025</p>
 
+    <!-- Sticky Navigation -->
+    <nav class="sticky-nav">
+        <a href="#schedule-kachel">Zeitplan</a>
+        <a href="#activities-kachel">Aktivitäten</a>
+        <a href="#todo-kachel">To-Dos</a>
+        <a href="#participants-kachel">Teilnehmer</a>
+        <a href="#accommodation-kachel">Unterkunft</a>
+        <a href="#travel-kachel">Reise</a>
+    </nav>
+
     <div class="container">
-        <!-- Kachel für den Zeitplan (nimmt auf großen Bildschirmen 2/3 Breite ein) -->
+        <!-- Kachel für den Zeitplan -->
         <div id="schedule-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="schedule-content">
                 <h2 class="text-3xl font-bold text-gray-800">Zeitplan des Junggesellenabschieds</h2>
@@ -197,88 +315,94 @@
             <div id="schedule-content" class="collapsible-content">
                 <div id="schedule-timeline" class="space-y-8">
                     <!-- Tag 1: Freitag, 08. August 2025 -->
-                    <div class="border-l-4 border-yellow-500 pl-4">
-                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 1: Freitag, 08. August 2025</h3>
-                        <div class="space-y-4">
-                            <div class="relative pl-8">
-                                <div class="absolute left-0 top-0 h-full w-2 bg-yellow-300 rounded-full"></div>
-                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-yellow-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">Anreise nach Berlin</p>
-                                <p class="text-gray-700">
-                                    <span class="font-semibold">ICE 374:</span>
-                                    <br> Mannheim Hbf: Abfahrt 08:32 Uhr
-                                    <br> Frankfurt (Main) Hbf: Abfahrt 09:14 Uhr
-                                    <br> Braunschweig Hbf: Abfahrt 12:01 Uhr
-                                    <br> Berlin Hbf: Ankunft 13:29 Uhr
-                                </p>
-                            </div>
-                            <div class="relative pl-8">
-                                <div class="absolute left-0 top-0 h-full w-2 bg-yellow-300 rounded-full"></div>
-                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-yellow-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">14:00 Uhr: Check-in Hotel Amano East Side</p>
-                                <p class="text-gray-700">Treffpunkt am Hotel.</p>
-                            </div>
-                            <div class="relative pl-8">
-                                <div class="absolute left-0 top-0 h-full w-2 bg-yellow-300 rounded-full"></div>
-                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-yellow-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">15:00 - 21:00 Uhr: Rooftop Party "Noire Berlin"</p>
-                                <p class="text-gray-700">Im Hotel Amano East Side. Musik: Afrohouse.</p>
+                    <div class="schedule-day-card">
+                        <div class="border-l-4 border-yellow-500 pl-4">
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 1: Freitag, 08. August 2025</h3>
+                            <div class="space-y-4">
+                                <div class="relative pl-8">
+                                    <div class="absolute left-0 top-0 h-full w-2 bg-yellow-300 rounded-full"></div>
+                                    <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-yellow-500 rounded-full"></div>
+                                    <p class="text-lg font-medium text-gray-900">Anreise nach Berlin</p>
+                                    <p class="text-gray-700">
+                                        <span class="font-semibold">ICE 374:</span>
+                                        <br> Mannheim Hbf: Abfahrt 08:32 Uhr
+                                        <br> Frankfurt (Main) Hbf: Abfahrt 09:14 Uhr
+                                        <br> Braunschweig Hbf: Abfahrt 12:01 Uhr
+                                        <br> Berlin Hbf: Ankunft 13:29 Uhr
+                                    </p>
+                                </div>
+                                <div class="relative pl-8">
+                                    <div class="absolute left-0 top-0 h-full w-2 bg-yellow-300 rounded-full"></div>
+                                    <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-yellow-500 rounded-full"></div>
+                                    <p class="text-lg font-medium text-gray-900">14:00 Uhr: Check-in Hotel Amano East Side</p>
+                                    <p class="text-gray-700">Treffpunkt am Hotel.</p>
+                                </div>
+                                <div class="relative pl-8">
+                                    <div class="absolute left-0 top-0 h-full w-2 bg-yellow-300 rounded-full"></div>
+                                    <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-yellow-500 rounded-full"></div>
+                                    <p class="text-lg font-medium text-gray-900">15:00 - 21:00 Uhr: Rooftop Party "Noire Berlin"</p>
+                                    <p class="text-gray-700">Im Hotel Amano East Side. Musik: Afrohouse.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Tag 2: Samstag, 09. August 2025 -->
-                    <div class="border-l-4 border-teal-500 pl-4">
-                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 2: Samstag, 09. August 2025</h3>
-                        <div class="space-y-4">
-                            <div class="relative pl-8">
-                                <div class="absolute left-0 top-0 h-full w-2 bg-teal-300 rounded-full"></div>
-                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-teal-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">08:00 - 12:00 Uhr: Frühstück</p>
-                                <p class="text-gray-700">Im Hotelrestaurant.</p>
-                            </div>
-                            <div class="relative pl-8">
-                                <div class="absolute left-0 top-0 h-full w-2 bg-teal-300 rounded-full"></div>
-                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-teal-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">12:30 - 16:30 Uhr: Bootsparty</p>
-                                <p class="text-gray-700">Veranstalter: Vollkommen Live. Musik: House Techno.</p>
-                            </div>
-                            <div class="relative pl-8">
-                                <div class="absolute left-0 top-0 h-full w-2 bg-teal-300 rounded-full"></div>
-                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-teal-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">Keine weiteren geplanten Aktivitäten</p>
-                                <p class="text-gray-700">Weitere Details folgen.</p>
+                    <div class="schedule-day-card">
+                        <div class="border-l-4 border-teal-500 pl-4">
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 2: Samstag, 09. August 2025</h3>
+                            <div class="space-y-4">
+                                <div class="relative pl-8">
+                                    <div class="absolute left-0 top-0 h-full w-2 bg-teal-300 rounded-full"></div>
+                                    <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-teal-500 rounded-full"></div>
+                                    <p class="text-lg font-medium text-gray-900">08:00 - 12:00 Uhr: Frühstück</p>
+                                    <p class="text-gray-700">Im Hotelrestaurant.</p>
+                                </div>
+                                <div class="relative pl-8">
+                                    <div class="absolute left-0 top-0 h-full w-2 bg-teal-300 rounded-full"></div>
+                                    <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-teal-500 rounded-full"></div>
+                                    <p class="text-lg font-medium text-gray-900">12:30 - 16:30 Uhr: Bootsparty</p>
+                                    <p class="text-gray-700">Veranstalter: Vollkommen Live. Musik: House Techno.</p>
+                                </div>
+                                <div class="relative pl-8">
+                                    <div class="absolute left-0 top-0 h-full w-2 bg-teal-300 rounded-full"></div>
+                                    <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-teal-500 rounded-full"></div>
+                                    <p class="text-lg font-medium text-gray-900">Keine weiteren geplanten Aktivitäten</p>
+                                    <p class="text-gray-700">Weitere Details folgen.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Tag 3: Sonntag, 10. August 2025 -->
-                    <div class="border-l-4 border-red-500 pl-4">
-                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 3: Sonntag, 10. August 2025</h3>
-                        <div class="space-y-4">
-                            <div class="relative pl-8">
-                                <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
-                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">08:00 - 12:00 Uhr: Frühstück</p>
-                                <p class="text-gray-700">Im Hotelrestaurant.</p>
-                            </div>
-                            <div class="relative pl-8">
-                                <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
-                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">12:00 Uhr: Check-out</p>
-                                <p class="text-gray-700">Hotel Amano East Side.</p>
-                            </div>
-                            <div class="relative pl-8">
-                                <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
-                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
-                                <p class="text-lg font-medium text-gray-900">Abreise</p>
-                                <p class="text-gray-700">
-                                    <span class="font-semibold">ICE 377:</span>
-                                    <br> Berlin Hbf: Abfahrt 16:30 Uhr
-                                    <br> Braunschweig Hbf: Ankunft 17:55 Uhr / Abfahrt 17:57 Uhr
-                                    <br> Frankfurt (Main) Hbf: Ankunft 20:44 Uhr / Abfahrt 20:50 Uhr
-                                    <br> Mannheim Hbf: Ankunft 21:27 Uhr
-                                </p>
+                    <div class="schedule-day-card">
+                        <div class="border-l-4 border-red-500 pl-4">
+                            <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 3: Sonntag, 10. August 2025</h3>
+                            <div class="space-y-4">
+                                <div class="relative pl-8">
+                                    <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
+                                    <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
+                                    <p class="text-lg font-medium text-gray-900">08:00 - 12:00 Uhr: Frühstück</p>
+                                    <p class="text-gray-700">Im Hotelrestaurant.</p>
+                                </div>
+                                <div class="relative pl-8">
+                                    <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
+                                    <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
+                                    <p class="text-lg font-medium text-gray-900">12:00 Uhr: Check-out</p>
+                                    <p class="text-gray-700">Hotel Amano East Side.</p>
+                                </div>
+                                <div class="relative pl-8">
+                                    <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
+                                    <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
+                                    <p class="text-lg font-medium text-gray-900">Abreise</p>
+                                    <p class="text-gray-700">
+                                        <span class="font-semibold">ICE 377:</span>
+                                        <br> Berlin Hbf: Abfahrt 16:30 Uhr
+                                        <br> Braunschweig Hbf: Ankunft 17:55 Uhr / Abfahrt 17:57 Uhr
+                                        <br> Frankfurt (Main) Hbf: Ankunft 20:44 Uhr / Abfahrt 20:50 Uhr
+                                        <br> Mannheim Hbf: Ankunft 21:27 Uhr
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -307,7 +431,7 @@
             </div>
         </div>
 
-        <!-- Neue Kachel für Offene To-Dos (JETZT HIER) -->
+        <!-- Neue Kachel für Offene To-Dos -->
         <div id="todo-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="todo-content">
                 <h2 class="text-3xl font-bold text-gray-800">Offene To-Dos</h2>
@@ -315,14 +439,14 @@
             </div>
             <div id="todo-content" class="collapsible-content">
                 <div id="todo-list" class="space-y-3">
-                    <div class="todo-item">
+                    <div class="todo-item" data-todo-id="rooftop">
                         <div class="checkbox-container">
                             <input type="checkbox" id="todo1" name="todo1" value="rooftop">
                             <label for="todo1" class="label">Tickets für Rooftop Party "Noire Berlin" kaufen:</label>
                         </div>
                         <span class="description">Louis kümmert sich darum, sobald diese im Shop verfügbar sind.</span>
                     </div>
-                    <div class="todo-item">
+                    <div class="todo-item" data-todo-id="boatparty">
                         <div class="checkbox-container">
                             <input type="checkbox" id="todo2" name="todo2" value="boatparty">
                             <label for="todo2" class="label">Tickets für Bootsparty kaufen:</label>
@@ -334,7 +458,7 @@
             </div>
         </div>
 
-        <!-- Kachel für die Teilnehmerliste (JETZT HIER) -->
+        <!-- Kachel für die Teilnehmerliste -->
         <div id="participants-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
             <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="participants-content">
                 <h2 class="text-3xl font-bold text-gray-800">Teilnehmerliste</h2>
@@ -344,52 +468,52 @@
                 <div id="participants-list" class="space-y-3">
                     <!-- Teilnehmer werden hier dynamisch eingefügt -->
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Michi</span>
                         <span class="description">(Junggeselle)</span>
                     </div>
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Thomas P.</span>
                         <span class="description">(Brautzeuge)</span>
                     </div>
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Dennis M.</span>
                         <span class="description">(Cousin)</span>
                     </div>
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Alex M.</span>
                         <span class="description">(Cousin)</span>
                     </div>
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Thomas</span>
                         <span class="description">(Kollege)</span>
                     </div>
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Louis</span>
                         <span class="description">("Schwager")</span>
                     </div>
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Sergej</span>
                         <span class="description">(Kollege)</span>
                     </div>
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Vitali</span>
                         <span class="description">(Bruder)</span>
                     </div>
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Willi</span>
                         <span class="description">(Bruder)</span>
                     </div>
                     <div class="participant-item">
-                        <span class="icon">&#128100;</span>
+                        <span class="icon"><i data-lucide="user"></i></span>
                         <span class="name">Erwin</span>
                         <span class="description">(Kollege)</span>
                     </div>
@@ -406,17 +530,31 @@
             <div id="accommodation-content" class="collapsible-content">
                 <div class="space-y-4 text-gray-700">
                     <div class="info-item">
-                        <span class="icon">&#127976;</span> <!-- Hotel Icon Emoji -->
                         <span class="label">Hotel:</span>
-                        <span class="value"><a href="https://www.google.com/maps/search/?api=1&query=Amano%20East%20Side%2C%20Berlin" target="_blank" class="text-blue-600 hover:underline">Amano East Side, Berlin</a></span>
+                        <span class="value">
+                            <a href="https://www.google.com/maps/search/?api=1&query=Amano%20East%20Side%2C%20Berlin" target="_blank" class="text-blue-600 hover:underline">Amano East Side, Berlin</a>
+                        </span>
+                    </div>
+                    <!-- Embedded Google Map -->
+                    <div class="google-map-embed">
+                        <iframe
+                            width="100%"
+                            height="100%"
+                            frameborder="0"
+                            style="border:0"
+                            src="https://maps.google.com/maps?q=Amano%20East%20Side%2C%20Berlin&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
                     </div>
                     <div class="info-item">
-                        <span class="icon">&#128717;&#65039;</span> <!-- Bed Icon Emoji -->
+                        <span class="icon"><i data-lucide="bed"></i></span> <!-- Bed Icon Lucide -->
                         <span class="label">Gebuchte Zimmer:</span>
                         <span class="value">7 Zimmer (3 Doppelzimmer, 4 Einzelzimmer)</span>
                     </div>
                     <div class="info-item">
-                        <span class="icon">&#128101;</span> <!-- Two People Icon Emoji -->
+                        <span class="icon"><i data-lucide="users"></i></span> <!-- Two People Icon Lucide -->
                         <span class="label">Doppelzimmer:</span>
                         <div class="value flex flex-col items-start">
                             <span>Thomas P. & Michi</span>
@@ -425,7 +563,7 @@
                         </div>
                     </div>
                     <div class="info-item">
-                        <span class="icon">&#128100;</span> <!-- Person Icon Emoji -->
+                        <span class="icon"><i data-lucide="user"></i></span> <!-- Person Icon Lucide -->
                         <span class="label">Einzelzimmer:</span>
                         <div class="value flex flex-col items-start">
                             <span>Louis</span>
@@ -448,17 +586,17 @@
                 <div class="space-y-4 text-gray-700">
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Hinfahrt: Freitag, 08. August 2025</h3>
                     <div class="info-item">
-                        <span class="icon">&#128642;</span> <!-- Train Icon Emoji -->
+                        <span class="icon"><i data-lucide="train"></i></span> <!-- Train Icon Lucide -->
                         <span class="label">Zug:</span>
-                        <span class="value"><a href="https://www.google.com/maps/search/?api=1&query=ICE+374+Mannheim+Hbf+to+Berlin+Hbf" target="_blank" class="text-blue-600 hover:underline">ICE 374</a></span>
+                        <span class="value"><a href="https://www.google.com/maps/search/?api=1&query=ICE+374+Mannheim%20Hbf%20to%20Berlin%20Hbf" target="_blank" class="text-blue-600 hover:underline">ICE 374</a></span>
                     </div>
                     <div class="info-item">
-                        <span class="icon">&#128187;</span> <!-- Computer/Seat Icon Emoji -->
+                        <span class="icon"><i data-lucide="monitor"></i></span> <!-- Monitor Icon Lucide (for reserved seats) -->
                         <span class="label">Reservierte Plätze:</span>
                         <span class="value">71, 72, 73, 74, 75, 76, 78</span>
                     </div>
                     <div class="info-item">
-                        <span class="icon">&#9200;</span> <!-- Clock Icon Emoji -->
+                        <span class="icon"><i data-lucide="clock"></i></span> <!-- Clock Icon Lucide -->
                         <span class="label">Fahrzeiten:</span>
                         <div class="value flex flex-col items-start">
                             <span>Mannheim Hbf: Abfahrt 08:32 Uhr</span>
@@ -470,23 +608,23 @@
 
                     <h3 class="text-xl font-semibold text-gray-800 mt-6 mb-2">Rückfahrt: Sonntag, 10. August 2025</h3>
                     <div class="info-item">
-                        <span class="icon">&#128642;</span> <!-- Train Icon Emoji -->
+                        <span class="icon"><i data-lucide="train"></i></span> <!-- Train Icon Lucide -->
                         <span class="label">Zug:</span>
-                        <span class="value"><a href="https://www.google.com/maps/search/?api=1&query=ICE+377+Berlin+Hbf+to+Mannheim+Hbf" target="_blank" class="text-blue-600 hover:underline">ICE 377</a></span>
+                        <span class="value"><a href="https://www.google.com/maps/search/?api=1&query=ICE+377+Berlin%20Hbf%20to%20Mannheim%20Hbf" target="_blank" class="text-blue-600 hover:underline">ICE 377</a></span>
                     </div>
                     <div class="info-item">
-                        <span class="icon">&#128187;</span> <!-- Computer/Seat Icon Emoji -->
+                        <span class="icon"><i data-lucide="monitor"></i></span> <!-- Monitor Icon Lucide (for reserved seats) -->
                         <span class="label">Reservierte Plätze:</span>
                         <span class="value">71, 72, 73, 74, 75</span>
                     </div>
                     <div class="info-item">
-                        <span class="icon">&#9200;</span> <!-- Clock Icon Emoji -->
+                        <span class="icon"><i data-lucide="clock"></i></span> <!-- Clock Icon Lucide -->
                         <span class="label">Fahrzeiten:</span>
                         <div class="value flex flex-col items-start">
                             <span>Berlin Hbf: Abfahrt 16:30 Uhr</span>
-                            <span>Braunschweig Hbf: Ankunft 17:55 Uhr / Abfahrt 17:57 Uhr</span>
-                            <span>Frankfurt (Main) Hbf: Ankunft 20:44 Uhr / Abfahrt 20:50 Uhr</span>
-                            <span>Mannheim Hbf: Ankunft 21:27 Uhr</span>
+                            <span>Braunschweig Hbf: Ankunft 17:55 Uhr / Abfahrt 17:57 Uhr
+                            <br> Frankfurt (Main) Hbf: Ankunft 20:44 Uhr / Abfahrt 20:50 Uhr
+                            <br> Mannheim Hbf: Ankunft 21:27 Uhr
                         </div>
                     </div>
                 </div>
@@ -496,8 +634,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+            // Initialize Lucide Icons
+            lucide.createIcons();
 
+            const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+            const navLinks = document.querySelectorAll('.sticky-nav a');
+            const sections = document.querySelectorAll('.container > div[id]'); // All main kachels
+
+            // --- Collapsible Header Logic (Optimized) ---
             collapsibleHeaders.forEach(header => {
                 const contentId = header.getAttribute('aria-controls');
                 const content = document.getElementById(contentId);
@@ -505,11 +649,8 @@
 
                 // Function to set initial state and handle resize
                 const setContentHeight = () => {
-                    // Temporarily remove max-height to get the true scrollHeight
                     content.style.maxHeight = 'none';
-                    // Force reflow to ensure the browser calculates the correct scrollHeight
-                    // This is crucial for mobile, where layout can change significantly
-                    content.offsetHeight;
+                    content.offsetHeight; // Force reflow
                     const currentScrollHeight = content.scrollHeight;
 
                     if (header.getAttribute('aria-expanded') === 'true') {
@@ -530,54 +671,121 @@
                     const isExpanded = header.getAttribute('aria-expanded') === 'true';
 
                     if (isExpanded) {
-                        // Before collapsing, ensure max-height is set to current scrollHeight
-                        // This prevents jumps if content was previously 'none' or dynamically changed
                         content.style.maxHeight = content.scrollHeight + 'px';
-                        // Force a reflow to apply the pixel value before transition to 0
                         content.offsetHeight; 
-                        content.style.maxHeight = '0px'; // Start the collapse animation
-                        content.classList.add('collapsed'); // Add class for opacity/padding changes
+                        content.style.maxHeight = '0px'; 
+                        content.classList.add('collapsed');
                         header.setAttribute('aria-expanded', 'false');
                         icon.style.transform = 'rotate(-90deg)';
                     } else {
-                        // When expanding, remove 'collapsed' class and temporarily clear max-height
-                        // to get the accurate scrollHeight for the full content.
                         content.classList.remove('collapsed');
-                        content.style.maxHeight = 'none'; // Temporarily set to none to get true scrollHeight
-                        const currentScrollHeight = content.scrollHeight; // Get the full height
+                        content.style.maxHeight = 'none'; 
+                        const currentScrollHeight = content.scrollHeight; 
 
-                        // Set max-height to 0, force reflow, then set to actual height
-                        // This ensures the transition is visible from 0 to full height
                         content.style.maxHeight = '0px';
-                        content.offsetHeight; // Force reflow
-                        content.style.maxHeight = currentScrollHeight + 'px'; // Animate to full height
+                        content.offsetHeight;
+                        content.style.maxHeight = currentScrollHeight + 'px';
 
                         header.setAttribute('aria-expanded', 'true');
                         icon.style.transform = 'rotate(0deg)';
                     }
                 });
 
-                // Crucial: After expansion, set max-height to 'none' to allow natural content flow
-                // and prevent content being cut off on resize or dynamic changes.
                 content.addEventListener('transitionend', () => {
                     if (header.getAttribute('aria-expanded') === 'true') {
                         content.style.maxHeight = 'none';
                     }
                 });
 
-                // Handle window resize to adjust maxHeight for expanded sections
                 let resizeTimeout;
                 window.addEventListener('resize', () => {
                     clearTimeout(resizeTimeout);
                     resizeTimeout = setTimeout(() => {
-                        // Only recalculate if the section is currently expanded
                         if (header.getAttribute('aria-expanded') === 'true') {
-                            // Temporarily set to 'none' to get the true current scrollHeight
                             content.style.maxHeight = 'none';
                             content.style.maxHeight = content.scrollHeight + 'px';
                         }
-                    }, 100); // Debounce for 100ms
+                    }, 100);
                 });
+            });
+
+            // --- To-Do Checkbox Logic (Status Speichern) ---
+            const todoCheckboxes = document.querySelectorAll('.todo-item input[type="checkbox"]');
+
+            // Load saved states
+            todoCheckboxes.forEach(checkbox => {
+                const todoItem = checkbox.closest('.todo-item');
+                const todoId = todoItem.dataset.todoId;
+                const savedState = localStorage.getItem(`todo-${todoId}`);
+                if (savedState === 'checked') {
+                    checkbox.checked = true;
+                    todoItem.classList.add('completed');
+                }
+            });
+
+            // Add event listeners for changes
+            todoCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => {
+                    const todoItem = event.target.closest('.todo-item');
+                    const todoId = todoItem.dataset.todoId;
+                    if (event.target.checked) {
+                        todoItem.classList.add('completed');
+                        localStorage.setItem(`todo-${todoId}`, 'checked');
+                    } else {
+                        todoItem.classList.remove('completed');
+                        localStorage.setItem(`todo-${todoId}`, 'unchecked');
+                    }
+                });
+            });
+
+            // --- Sticky Navigation Active State Logic (Refactored) ---
+            const stickyNav = document.querySelector('.sticky-nav');
+            const updateActiveNavLink = () => {
+                let currentActiveSectionId = null;
+                const stickyNavHeight = stickyNav.offsetHeight; // Get current height of sticky nav
+
+                // Find the section whose top is closest to the bottom of the sticky nav
+                // and is still visible.
+                let minDistance = Infinity;
+                sections.forEach(section => {
+                    const rect = section.getBoundingClientRect();
+                    // We want the section whose top is just below the sticky nav
+                    // or whose bottom is still visible if it's the last section.
+                    const distance = Math.abs(rect.top - stickyNavHeight);
+
+                    // Consider a section active if its top is above or near the sticky nav's bottom
+                    // and its bottom is still within the viewport.
+                    if (rect.top <= stickyNavHeight + 20 && rect.bottom > 0 && distance < minDistance) {
+                        minDistance = distance;
+                        currentActiveSectionId = section.id;
+                    }
+                });
+
+                // Fallback: If no section is clearly active (e.g., at very top of page),
+                // default to the first section.
+                if (!currentActiveSectionId && sections.length > 0) {
+                    currentActiveSectionId = sections[0].id;
+                }
+
+                // Update active class on navigation links
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === `#${currentActiveSectionId}`) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            };
+
+            // Run on scroll and initial load
+            window.addEventListener('scroll', updateActiveNavLink);
+            updateActiveNavLink(); // Call once on load
+
+            // Add a resize listener with debounce to update active link on layout changes
+            let resizeTimeout;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(updateActiveNavLink, 100);
             });
         });
     </script>
