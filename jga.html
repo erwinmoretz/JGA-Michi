@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Junggesellenabschiedsplaner</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for font and background */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top */
+            min-height: 100vh; /* Minimum viewport height */
+            padding: 1rem; /* Reduced padding for smartphones */
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 1200px; /* Maximum container width */
+            width: 100%;
+            display: grid;
+            gap: 1.5rem; /* Reduced gap between tiles for smartphones */
+            grid-template-columns: 1fr; /* Default single column for small screens */
+        }
+        @media (min-width: 768px) { /* For medium screens (tablets) */
+            .container {
+                gap: 2rem; /* Normal gap for tablets */
+                grid-template-columns: 1fr 1fr; /* Two columns */
+            }
+            #schedule-kachel {
+                grid-column: span 2; /* Schedule takes both columns */
+            }
+        }
+        @media (min-width: 1024px) { /* For large screens (desktops) */
+            .container {
+                /* Schedule takes full width at the top, other tiles below */
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            #schedule-kachel {
+                grid-column: span 3; /* Schedule takes all three columns */
+            }
+            /* Arrangement of remaining tiles below the schedule */
+            #activities-kachel { grid-column: 1 / span 1; }
+            #participants-kachel { grid-column: 2 / span 1; }
+            #accommodation-kachel { grid-column: 3 / span 1; }
+            #travel-kachel { grid-column: 1 / span 2; } /* Travel info takes 2 columns */
+            #todo-kachel { grid-column: 3 / span 1; } /* To-Do takes 1 column */
+        }
+
+        /* Additional styles for participant list, accommodation, and travel information for better appearance and space saving */
+        .participant-item, .info-item, .todo-item {
+            display: flex;
+            flex-direction: column; /* Default column layout for small screens */
+            align-items: flex-start; /* Align to left */
+            padding: 0.75rem 1rem;
+            background-color: #f8fafc; /* Very light blue */
+            border: 1px solid #e0e7ff; /* Light blue border */
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        @media (min-width: 640px) { /* From small tablets/larger smartphones, back to row */
+            .participant-item, .info-item, .todo-item {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+
+        .participant-item .icon, .info-item .icon, .todo-item .icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem; /* Slightly less space to text */
+            color: #6366f1; /* Darker blue */
+            flex-shrink: 0; /* Prevents icon from shrinking */
+            margin-bottom: 0.25rem; /* Bottom margin in column layout */
+        }
+        @media (min-width: 640px) {
+            .participant-item .icon, .info-item .icon, .todo-item .icon {
+                margin-bottom: 0; /* Reset in row layout */
+            }
+        }
+
+        .participant-item .name, .info-item .label, .todo-item .label {
+            font-weight: 600;
+            color: #1f2937; /* Dark text */
+            margin-right: 0.5rem; /* Space between name/label and description/value */
+            margin-bottom: 0.25rem; /* Bottom margin in column layout */
+        }
+        @media (min-width: 640px) {
+            .participant-item .name, .info-item .label, .todo-item .label {
+                margin-bottom: 0; /* Reset in row layout */
+            }
+        }
+
+        .participant-item .description, .info-item .value, .todo-item .description {
+            font-size: 0.9rem;
+            color: #6b7280; /* Gray text for description/value */
+            white-space: normal; /* Allows line breaks for smartphones */
+            overflow: visible; /* Shows overflowing text */
+            text-overflow: clip; /* No ellipsis, text wraps */
+        }
+        @media (min-width: 640px) {
+            .participant-item .description, .info-item .value, .todo-item .description {
+                white-space: nowrap; /* Back to single line from tablet size */
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .info-item .value.flex-col {
+            white-space: normal; /* Allows line breaks for lists in values */
+        }
+
+        /* Styles for collapsible sections */
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding-bottom: 1rem; /* Space below header */
+            border-bottom: 1px solid #e0e7ff; /* Separator */
+            margin-bottom: 1rem; /* Space below separator */
+        }
+        .collapsible-header h2 {
+            margin-bottom: 0; /* Remove default margin from h2 */
+        }
+        .collapsible-icon {
+            transition: transform 0.3s ease;
+        }
+        .collapsible-header[aria-expanded="true"] .collapsible-icon {
+            transform: rotate(0deg);
+        }
+        .collapsible-header[aria-expanded="false"] .collapsible-icon {
+            transform: rotate(-90deg); /* Rotate icon when collapsed */
+        }
+        .collapsible-content {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out; /* Smooth transition for collapsing */
+        }
+        .collapsible-content.collapsed {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="container">
+        <!-- Tile for the schedule (takes 2/3 width on large screens) -->
+        <div id="schedule-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="schedule-content">
+                <h2 class="text-3xl font-bold text-gray-800">Zeitplan des Junggesellenabschieds</h2>
+                <span class="collapsible-icon text-gray-600 text-2xl">&#9660;</span> <!-- Down arrow -->
+            </div>
+            <div id="schedule-content" class="collapsible-content">
+                <div id="schedule-timeline" class="space-y-8">
+                    <!-- Day 1: Friday, August 08, 2025 -->
+                    <div class="border-l-4 border-yellow-500 pl-4">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 1: Freitag, 08. August 2025</h3>
+                        <div class="space-y-4">
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-0 h-full w-2 bg-yellow-300 rounded-full"></div>
+                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-yellow-500 rounded-full"></div>
+                                <p class="text-lg font-medium text-gray-900">Anreise nach Berlin</p>
+                                <p class="text-gray-700">
+                                    <span class="font-semibold">ICE 374:</span>
+                                    <br> Mannheim Hbf: Abfahrt 08:32 Uhr
+                                    <br> Frankfurt (Main) Hbf: Abfahrt 09:14 Uhr
+                                    <br> Braunschweig Hbf: Abfahrt 12:01 Uhr
+                                    <br> Berlin Hbf: Ankunft 13:29 Uhr
+                                </p>
+                            </div>
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-0 h-full w-2 bg-yellow-300 rounded-full"></div>
+                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-yellow-500 rounded-full"></div>
+                                <p class="text-lg font-medium text-gray-900">14:00 Uhr: Check-in Hotel Amano East Side</p>
+                                <p class="text-gray-700">Treffpunkt am Hotel.</p>
+                            </div>
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-0 h-full w-2 bg-yellow-300 rounded-full"></div>
+                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-yellow-500 rounded-full"></div>
+                                <p class="text-lg font-medium text-gray-900">15:00 - 21:00 Uhr: Rooftop Party "Noire Berlin"</p>
+                                <p class="text-gray-700">Im Hotel Amano East Side. Musik: Afrohouse.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day 2: Saturday, August 09, 2025 -->
+                    <div class="border-l-4 border-teal-500 pl-4">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 2: Samstag, 09. August 2025</h3>
+                        <div class="space-y-4">
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-0 h-full w-2 bg-teal-300 rounded-full"></div>
+                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-teal-500 rounded-full"></div>
+                                <p class="text-lg font-medium text-gray-900">08:00 - 12:00 Uhr: Frühstück</p>
+                                <p class="text-gray-700">Im Hotelrestaurant.</p>
+                            </div>
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-0 h-full w-2 bg-teal-300 rounded-full"></div>
+                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-teal-500 rounded-full"></div>
+                                <p class="text-lg font-medium text-gray-900">12:30 - 16:30 Uhr: Bootsparty</p>
+                                <p class="text-gray-700">Veranstalter: Vollkommen Live. Musik: House Techno.</p>
+                            </div>
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-0 h-full w-2 bg-teal-300 rounded-full"></div>
+                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-teal-500 rounded-full"></div>
+                                <p class="text-lg font-medium text-gray-900">Keine weiteren geplanten Aktivitäten</p>
+                                <p class="text-gray-700">Weitere Details folgen.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Day 3: Sunday, August 10, 2025 -->
+                    <div class="border-l-4 border-red-500 pl-4">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Tag 3: Sonntag, 10. August 2025</h3>
+                        <div class="space-y-4">
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
+                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
+                                <p class="text-lg font-medium text-gray-900">08:00 - 12:00 Uhr: Frühstück</p>
+                                <p class="text-gray-700">Im Hotelrestaurant.</p>
+                            </div>
+                            <div class="relative pl-8">
+                                <div class="absolute left-0 top-0 h-full w-2 bg-red-300 rounded-full"></div>
+                                <div class="absolute left-0 top-0 -ml-1 mt-1 w-4 h-4 bg-red-500 rounded-full"></div>
+                                <p class="text-lg font-medium text-gray-900">12:00 Uhr: Check-out & Abreise</p>
+                                <p class="text-gray-700">
+                                    <span class="font-semibold">ICE 377:</span>
+                                    <br> Berlin Hbf: Abfahrt 07:24 Uhr
+                                    <br> Braunschweig Hbf: Ankunft 08:55 Uhr / Abfahrt 08:57 Uhr
+                                    <br> Frankfurt (Main) Hbf: Ankunft 11:43 Uhr / Abfahrt 11:50 Uhr
+                                    <br> Mannheim Hbf: Ankunft 12:27 Uhr / Abfahrt 12:34 Uhr
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tile for activities list -->
+        <div id="activities-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="activities-content">
+                <h2 class="text-3xl font-bold text-gray-800">Aktivitäten für den Junggesellenabschied</h2>
+                <span class="collapsible-icon text-gray-600 text-2xl">&#9660;</span>
+            </div>
+            <div id="activities-content" class="collapsible-content">
+                <div id="activities-list" class="space-y-4">
+                    <div class="bg-blue-50 p-4 rounded-md border border-blue-200">
+                        <h3 class="text-xl font-semibold text-blue-800">Rooftop Party "Noire Berlin"</h3>
+                        <p class="text-gray-700">Findet im Hotel Amano East Side statt. Musik: Afrohouse.</p>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-md border border-blue-200">
+                        <h3 class="text-xl font-semibold text-blue-800">Bootsparty</h3>
+                        <p class="text-gray-700">Veranstalter: Vollkommen Live. Musik: House Techno. Kosten: 51€ p.P.</p>
+                    </div>
+                    <!-- More activities will be added here gradually -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tile for participant list -->
+        <div id="participants-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="participants-content">
+                <h2 class="text-3xl font-bold text-gray-800">Teilnehmerliste</h2>
+                <span class="collapsible-icon text-gray-600 text-2xl">&#9660;</span>
+            </div>
+            <div id="participants-content" class="collapsible-content">
+                <div id="participants-list" class="space-y-3">
+                    <!-- Participants will be dynamically inserted here -->
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Michi</span>
+                        <span class="description">(Junggeselle)</span>
+                    </div>
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Thomas P.</span>
+                        <span class="description">(Brautzeuge)</span>
+                    </div>
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Dennis M.</span>
+                        <span class="description">(Cousin)</span>
+                    </div>
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Alex M.</span>
+                        <span class="description">(Cousin)</span>
+                    </div>
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Thomas</span>
+                        <span class="description">(Kollege)</span>
+                    </div>
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Louis</span>
+                        <span class="description">("Schwager")</span>
+                    </div>
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Sergej</span>
+                        <span class="description">(Kollege)</span>
+                    </div>
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Vitali</span>
+                        <span class="description">(Bruder)</span>
+                    </div>
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Willi</span>
+                        <span class="description">(Bruder)</span>
+                    </div>
+                    <div class="participant-item">
+                        <span class="icon">&#128100;</span>
+                        <span class="name">Erwin</span>
+                        <span class="description">(Kollege)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tile for accommodation & room distribution -->
+        <div id="accommodation-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="accommodation-content">
+                <h2 class="text-3xl font-bold text-gray-800">Unterkunft & Zimmerverteilung</h2>
+                <span class="collapsible-icon text-gray-600 text-2xl">&#9660;</span>
+            </div>
+            <div id="accommodation-content" class="collapsible-content">
+                <div class="space-y-4 text-gray-700">
+                    <div class="info-item">
+                        <span class="icon">&#127976;</span> <!-- Hotel Icon Emoji -->
+                        <span class="label">Hotel:</span>
+                        <span class="value">Amano East Side, Berlin</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">&#128717;&#65039;</span> <!-- Bed Icon Emoji -->
+                        <span class="label">Gebuchte Zimmer:</span>
+                        <span class="value">7 Zimmer (3 Doppelzimmer, 4 Einzelzimmer)</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">&#128101;</span> <!-- Two People Icon Emoji -->
+                        <span class="label">Doppelzimmer:</span>
+                        <div class="value flex flex-col items-start">
+                            <span>Thomas P. & Michi</span>
+                            <span>Alex M. & Erwin</span>
+                            <span>Thomas & Dennis M.</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">&#128100;</span> <!-- Person Icon Emoji -->
+                        <span class="label">Einzelzimmer:</span>
+                        <div class="value flex flex-col items-start">
+                            <span>Louis</span>
+                            <span>Sergej</span>
+                            <span>Vitali</span>
+                            <span>Willi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New tile for travel information -->
+        <div id="travel-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="travel-content">
+                <h2 class="text-3xl font-bold text-gray-800">Reiseinformationen</h2>
+                <span class="collapsible-icon text-gray-600 text-2xl">&#9660;</span>
+            </div>
+            <div id="travel-content" class="collapsible-content">
+                <div class="space-y-4 text-gray-700">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Hinfahrt: Freitag, 08. August 2025</h3>
+                    <div class="info-item">
+                        <span class="icon">&#128642;</span> <!-- Train Icon Emoji -->
+                        <span class="label">Zug:</span>
+                        <span class="value">ICE 374</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">&#128187;</span> <!-- Computer/Seat Icon Emoji -->
+                        <span class="label">Reservierte Plätze:</span>
+                        <span class="value">71, 72, 73, 74, 75, 76, 78</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">&#9200;</span> <!-- Clock Icon Emoji -->
+                        <span class="label">Fahrzeiten:</span>
+                        <div class="value flex flex-col items-start">
+                            <span>Mannheim Hbf: Abfahrt 08:32 Uhr</span>
+                            <span>Frankfurt (Main) Hbf: Abfahrt 09:14 Uhr</span>
+                            <span>Braunschweig Hbf: Abfahrt 12:01 Uhr</span>
+                            <span>Berlin Hbf: Ankunft 13:29 Uhr</span>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-gray-800 mt-6 mb-2">Rückfahrt: Sonntag, 10. August 2025</h3>
+                    <div class="info-item">
+                        <span class="icon">&#128642;</span> <!-- Train Icon Emoji -->
+                        <span class="label">Zug:</span>
+                        <span class="value">ICE 377</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">&#128187;</span> <!-- Computer/Seat Icon Emoji -->
+                        <span class="label">Reservierte Plätze:</span>
+                        <span class="value">71, 72, 73, 74, 75</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="icon">&#9200;</span> <!-- Clock Icon Emoji -->
+                        <span class="label">Fahrzeiten:</span>
+                        <div class="value flex flex-col items-start">
+                            <span>Berlin Hbf: Abfahrt 07:24 Uhr</span>
+                            <span>Braunschweig Hbf: Ankunft 08:55 Uhr / Abfahrt 08:57 Uhr</span>
+                            <span>Frankfurt (Main) Hbf: Ankunft 11:43 Uhr / Abfahrt 11:50 Uhr</span>
+                            <span>Mannheim Hbf: Ankunft 12:27 Uhr / Abfahrt 12:34 Uhr</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New tile for open To-Dos -->
+        <div id="todo-kachel" class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+            <div class="collapsible-header" role="button" aria-expanded="true" aria-controls="todo-content">
+                <h2 class="text-3xl font-bold text-gray-800">Offene To-Dos</h2>
+                <span class="collapsible-icon text-gray-600 text-2xl">&#9660;</span>
+            </div>
+            <div id="todo-content" class="collapsible-content">
+                <div id="todo-list" class="space-y-3">
+                    <div class="todo-item">
+                        <span class="icon">&#10003;&#65039;</span> <!-- Checkmark Icon Emoji -->
+                        <span class="label">Tickets für Rooftop Party "Noire Berlin" kaufen:</span>
+                        <span class="description">Louis kümmert sich darum, sobald diese im Shop verfügbar sind.</span>
+                    </div>
+                    <div class="todo-item">
+                        <span class="icon">&#10003;&#65039;</span> <!-- Checkmark Icon Emoji -->
+                        <span class="label">Tickets für Bootsparty kaufen:</span>
+                        <span class="description">Veranstalter: Vollkommen Live. Kosten: 51€ p.P.</span>
+                    </div>
+                    <!-- More To-Dos will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+
+            collapsibleHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const contentId = header.getAttribute('aria-controls');
+                    const content = document.getElementById(contentId);
+                    const isExpanded = header.getAttribute('aria-expanded') === 'true';
+                    const icon = header.querySelector('.collapsible-icon');
+
+                    if (isExpanded) {
+                        content.style.maxHeight = '0';
+                        content.classList.add('collapsed');
+                        header.setAttribute('aria-expanded', 'false');
+                        icon.style.transform = 'rotate(-90deg)'; // Rotate icon when collapsed
+                    } else {
+                        // Set max-height to scrollHeight to allow smooth transition
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        content.classList.remove('collapsed');
+                        header.setAttribute('aria-expanded', 'true');
+                        icon.style.transform = 'rotate(0deg)'; // Reset icon rotation
+                    }
+                });
+
+                // Set initial max-height for smooth transition
+                const contentId = header.getAttribute('aria-controls');
+                const content = document.getElementById(contentId);
+                if (content) {
+                    content.style.maxHeight = content.scrollHeight + 'px'; // Set initial height to content's scrollHeight
+                }
+            });
+        });
+    </script>
+</body>
+</html>
